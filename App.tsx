@@ -52,6 +52,22 @@ const App: React.FC = () => {
   const [asciiArt, setAsciiArt] = useState<AsciiArtData | null>(null);
   const [generationTime, setGenerationTime] = useState<number | null>(null);
 
+  // F11 Fullscreen toggle
+  useEffect(() => {
+    const handleKeyPress = (e: KeyboardEvent) => {
+      if (e.key === 'F11') {
+        e.preventDefault();
+        if (!document.fullscreenElement) {
+          document.documentElement.requestFullscreen();
+        } else {
+          document.exitFullscreen();
+        }
+      }
+    };
+    window.addEventListener('keydown', handleKeyPress);
+    return () => window.removeEventListener('keydown', handleKeyPress);
+  }, []);
+
 
   useEffect(() => {
     if (!currentTopic) return;
