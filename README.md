@@ -7,7 +7,7 @@ This repository adapts that concept into a desktop app workflow with a React + T
 
 ## What it does
 
-- Generates a concise encyclopedia-style definition for any topic using Gemini.
+- Generates a concise encyclopedia-style definition for any topic using Gemini flash 2.5.
 - Streams text output progressively in the UI.
 - Makes words in generated content clickable to continue exploring related topics.
 - Generates ASCII art for the current topic.
