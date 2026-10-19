@@ -34,12 +34,6 @@ This repository adapts that concept into a desktop app workflow with a React + T
 - Run the exe file
 - Insert the API Key in required section
 
-### Frontend build
-
-```bash
-npm run build
-```
-
 ### Desktop bundle [for devs]
 
 ```bash
