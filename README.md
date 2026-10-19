@@ -1,6 +1,6 @@
 # Infinite Wiki PC
 
-Infinite Wiki PC is a desktop port of **Infinite Wiki** for Windows, built with **Tauri** by **[@Mahir29Flame](https://github.com/Mahir29Flame)**.
+Infinite Wiki PC is a desktop port of **Infinite Wiki** for Windows, ported with **Tauri** by **[@Mahir29Flame](https://github.com/Mahir29Flame)**.
 
 The original **Infinite Wiki** was a **Google AI Studio demo** created by **Dev Valladares** ([@dev_valladares](https://x.com/dev_valladares)).  
 This repository adapts that concept into a desktop app workflow with a React + TypeScript frontend and a Tauri (Rust) shell.
