@@ -1,6 +1,7 @@
 # Infinite Wiki PC
 
-<img width="792" height="744" alt="Screenshot 2026-10-19 175145" src="https://github.com/user-attachments/assets/47ac896d-01d7-4a83-8be9-be6ece13799c" />
+<img width="792" height="744" alt="Screenshot 2026-10-19 175145" src="https://github.com/user-attachments/assets/47ac896d-01d7-4a83-8be9-be6ece13799c" /> \
+[![Download Infinite Wiki PC](https://a.fsdn.com/con/app/sf-download-button)](https://sourceforge.net/projects/infinite-wiki/files/latest/download)
 
 Infinite Wiki PC is a desktop port of **Infinite Wiki** for Windows, ported with **Tauri** by **[@Mahir29Flame](https://github.com/Mahir29Flame)**.
 
