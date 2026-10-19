@@ -27,15 +27,12 @@ This repository adapts that concept into a desktop app workflow with a React + T
 
 1. Install Windows exe [Install](https://sourceforge.net/projects/infinite-wiki/)
 
-2. Provide your Gemini API key (used by the app via Vite env loading):
-
-   ```bash
-   # .env.local
-   GEMINI_API_KEY=your_api_key_here
+2. Get API key from [Google AI Studio Gemini API](https://aistudio.google.com/app/apikey)
    ```
 
 ## Run
-- run the exe file
+- Run the exe file
+- Insert the API Key in required section
 
 ### Frontend build
 
@@ -43,7 +40,7 @@ This repository adapts that concept into a desktop app workflow with a React + T
 npm run build
 ```
 
-### Desktop bundle
+### Desktop bundle [for devs]
 
 ```bash
 npm run tauri-build
