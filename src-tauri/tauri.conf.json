@@ -7,7 +7,7 @@
   },
   "package": {
     "productName": "Infinite Wiki PC",
-    "version": "0.1.5"
+    "version": "2.0.0"
   },
   "tauri": {
     "allowlist": {
