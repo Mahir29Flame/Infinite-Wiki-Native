@@ -1,7 +1,7 @@
 {
   "name": "infinite-wiki-pc",
   "private": true,
-  "version": "2.0.0",
+  "version": "2.1.0",
   "type": "module",
   "scripts": {
     "dev": "vite",
@@ -21,6 +21,7 @@
     "@tauri-apps/cli": "^1.6.3",
     "@types/node": "^22.14.0",
     "@vitejs/plugin-react": "^5.0.0",
+    "baseline-browser-mapping": "^2.11.29",
     "typescript": "~5.8.2",
     "vite": "^6.2.0"
   },

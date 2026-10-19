@@ -23,8 +23,40 @@ function getGenAIClient(): GoogleGenAI {
   return new GoogleGenAI({ apiKey });
 }
 
-const artModelName = 'gemini-2.5-flash';
-const textModelName = 'gemini-2.5-flash-lite';
+import {
+  getStoredTextModel,
+  setStoredTextModel,
+  getStoredArtModel,
+  setStoredArtModel,
+  getStoredAutoFallback,
+  FALLBACK_TEXT_MODEL,
+  FALLBACK_ART_MODEL,
+  getModelDisplayName,
+} from './modelsConfig';
+
+export {
+  getStoredTextModel,
+  setStoredTextModel,
+  getStoredArtModel,
+  setStoredArtModel,
+  getStoredAutoFallback,
+  getModelDisplayName,
+};
+
+/**
+ * Checks if an error is a Quota Exceeded (429 / RESOURCE_EXHAUSTED) error.
+ */
+export function isQuotaError(error: unknown): boolean {
+  if (!error) return false;
+  const message = error instanceof Error ? error.message : String(error);
+  return (
+    message.includes('429') ||
+    message.includes('RESOURCE_EXHAUSTED') ||
+    message.toLowerCase().includes('quota') ||
+    message.toLowerCase().includes('rate limit')
+  );
+}
+
 /**
  * Art-direction toggle for ASCII art generation.
  * `true`: Slower, higher-quality results (allows the model to "think").
@@ -44,13 +76,21 @@ export interface AsciiArtData {
   text?: string; // Text is now optional
 }
 
+
+export interface StreamDefinitionOptions {
+  model?: string;
+  onFallback?: (fallbackModel: string, reason: string) => void;
+}
+
 /**
  * Streams a definition for a given topic from the Gemini API.
  * @param topic The word or term to define.
+ * @param options Optional configuration including model override and onFallback callback.
  * @returns An async generator that yields text chunks of the definition.
  */
 export async function* streamDefinition(
   topic: string,
+  options?: StreamDefinitionOptions,
 ): AsyncGenerator<string, void, undefined> {
   const apiKey = getStoredApiKey();
   if (!apiKey) {
@@ -60,29 +100,60 @@ export async function* streamDefinition(
 
   const prompt = `Provide a concise, single-paragraph encyclopedia-style definition for the term: "${topic}". Be informative and neutral. Do not use markdown, titles, or any special formatting. Respond with only the text of the definition itself.`;
 
-  try {
-    const ai = getGenAIClient();
-    const response = await ai.models.generateContentStream({
-      model: textModelName,
-      contents: prompt,
-      config: {
-        // Disable thinking for the lowest possible latency, as requested.
-        thinkingConfig: { thinkingBudget: 0 },
-      },
-    });
+  let currentModel = options?.model || getStoredTextModel();
+  const autoFallback = getStoredAutoFallback();
+  let triedFallback = false;
 
-    for await (const chunk of response) {
-      if (chunk.text) {
-        yield chunk.text;
+  while (true) {
+    try {
+      const ai = getGenAIClient();
+      const config: any = {};
+      
+      // Configure thinking appropriately for the selected model
+      if (currentModel.startsWith('gemini-3')) {
+        config.thinkingConfig = { thinkingLevel: 'minimal' };
+      } else if (currentModel.startsWith('gemini-2')) {
+        config.thinkingConfig = { thinkingBudget: 0 };
       }
+      // Other models (like Gemma) do not support thinkingConfig
+
+      const response = await ai.models.generateContentStream({
+        model: currentModel,
+        contents: prompt,
+        config: Object.keys(config).length > 0 ? config : undefined,
+      });
+
+      for await (const chunk of response) {
+        if (chunk.text) {
+          yield chunk.text;
+        }
+      }
+      return;
+    } catch (error) {
+      if (
+        !triedFallback &&
+        autoFallback &&
+        currentModel !== FALLBACK_TEXT_MODEL &&
+        isQuotaError(error)
+      ) {
+        triedFallback = true;
+        const prevModelName = getModelDisplayName(currentModel);
+        currentModel = FALLBACK_TEXT_MODEL;
+        const fallbackName = getModelDisplayName(currentModel);
+        setStoredTextModel(currentModel);
+        if (options?.onFallback) {
+          options.onFallback(currentModel, `Quota limit reached on ${prevModelName}. Auto-switched to ${fallbackName}.`);
+        }
+        console.warn(`[Quota Fallback] Switched text model from ${prevModelName} to ${fallbackName}`);
+        continue;
+      }
+
+      console.error('Error streaming from Gemini:', error);
+      const errorMessage =
+        error instanceof Error ? error.message : 'An unknown error occurred.';
+      yield `Error: Could not generate content for "${topic}". ${errorMessage}`;
+      throw new Error(errorMessage);
     }
-  } catch (error) {
-    console.error('Error streaming from Gemini:', error);
-    const errorMessage =
-      error instanceof Error ? error.message : 'An unknown error occurred.';
-    yield `Error: Could not generate content for "${topic}". ${errorMessage}`;
-    // Re-throwing allows the caller to handle the error state definitively.
-    throw new Error(errorMessage);
   }
 }
 
@@ -90,19 +161,23 @@ export async function* streamDefinition(
  * Generates a single random word or concept using the Gemini API.
  * @returns A promise that resolves to a single random word.
  */
-export async function getRandomWord(): Promise<string> {
+export async function getRandomWord(model?: string): Promise<string> {
   const ai = getGenAIClient();
-
   const prompt = `Generate a single, random, interesting English word or a two-word concept. It can be a noun, verb, adjective, or a proper noun. Respond with only the word or concept itself, with no extra text, punctuation, or formatting.`;
+  const activeModel = model || getStoredTextModel();
 
   try {
+    const config: any = {};
+    if (activeModel.startsWith('gemini-3')) {
+      config.thinkingConfig = { thinkingLevel: 'minimal' };
+    } else if (activeModel.startsWith('gemini-2')) {
+      config.thinkingConfig = { thinkingBudget: 0 };
+    }
+
     const response = await ai.models.generateContent({
-      model: textModelName,
+      model: activeModel,
       contents: prompt,
-      config: {
-        // Disable thinking for low latency.
-        thinkingConfig: { thinkingBudget: 0 },
-      },
+      config: Object.keys(config).length > 0 ? config : undefined,
     });
     return response.text.trim();
   } catch (error) {
@@ -113,12 +188,21 @@ export async function getRandomWord(): Promise<string> {
   }
 }
 
+export interface AsciiArtOptions {
+  model?: string;
+  onFallback?: (fallbackModel: string, reason: string) => void;
+}
+
 /**
  * Generates ASCII art and optionally text for a given topic.
  * @param topic The topic to generate art for.
+ * @param options Optional configuration including model override and onFallback callback.
  * @returns A promise that resolves to an object with art and optional text.
  */
-export async function generateAsciiArt(topic: string): Promise<AsciiArtData> {
+export async function generateAsciiArt(
+  topic: string,
+  options?: AsciiArtOptions,
+): Promise<AsciiArtData> {
   const ai = getGenAIClient();
   
   const artPromptPart = `1. "art": meta ASCII visualization of the word "${topic}":
@@ -128,8 +212,7 @@ export async function generateAsciiArt(topic: string): Promise<AsciiArtData> {
     * "explosion" → radiating lines from center
     * "hierarchy" → pyramid structure
     * "flow" → curved directional lines
-  - Return as single string with \n for line breaks`;
-
+  - Return as single string with \\n for line breaks`;
 
   const keysDescription = `one key: "art"`;
   const promptBody = artPromptPart;
@@ -139,29 +222,33 @@ ${promptBody}
 
 Return ONLY the raw JSON object, no additional text. The response must start with "{" and end with "}" and contain only the art property.`;
 
-  const maxRetries = 1;
+  let currentModel = options?.model || getStoredArtModel();
+  const autoFallback = getStoredAutoFallback();
+  let triedFallback = false;
+
+  const maxRetries = 2;
   let lastError: Error | null = null;
 
   for (let attempt = 1; attempt <= maxRetries; attempt++) {
     try {
-      // FIX: Construct config object conditionally to avoid spreading a boolean
       const config: any = {
         responseMimeType: 'application/json',
       };
       if (!ENABLE_THINKING_FOR_ASCII_ART) {
-        config.thinkingConfig = { thinkingBudget: 0 };
+        if (currentModel.startsWith('gemini-3')) {
+          config.thinkingConfig = { thinkingLevel: 'minimal' };
+        } else if (currentModel.startsWith('gemini-2')) {
+          config.thinkingConfig = { thinkingBudget: 0 };
+        }
       }
 
       const response = await ai.models.generateContent({
-        model: artModelName,
+        model: currentModel,
         contents: prompt,
         config: config,
       });
 
       let jsonStr = response.text.trim();
-      
-      // Debug logging
-      console.log(`Attempt ${attempt}/${maxRetries} - Raw API response:`, jsonStr);
       
       // Remove any markdown code fences if present
       const fenceRegex = /^```(?:json)?\s*\n?(.*?)\n?\s*```$/s;
@@ -170,19 +257,16 @@ Return ONLY the raw JSON object, no additional text. The response must start wit
         jsonStr = match[1].trim();
       }
 
-      // Ensure the string starts with { and ends with }
       if (!jsonStr.startsWith('{') || !jsonStr.endsWith('}')) {
         throw new Error('Response is not a valid JSON object');
       }
 
       const parsedData = JSON.parse(jsonStr) as AsciiArtData;
       
-      // Validate the response structure
       if (typeof parsedData.art !== 'string' || parsedData.art.trim().length === 0) {
         throw new Error('Invalid or empty ASCII art in response');
       }
       
-      // If we get here, the validation passed
       const result: AsciiArtData = {
         art: parsedData.art,
       };
@@ -195,16 +279,35 @@ Return ONLY the raw JSON object, no additional text. The response must start wit
 
     } catch (error) {
       lastError = error instanceof Error ? error : new Error('Unknown error occurred');
+      
+      // Handle quota error fallback immediately if enabled
+      if (
+        !triedFallback &&
+        autoFallback &&
+        currentModel !== FALLBACK_ART_MODEL &&
+        isQuotaError(lastError)
+      ) {
+        triedFallback = true;
+        const prevModelName = getModelDisplayName(currentModel);
+        currentModel = FALLBACK_ART_MODEL;
+        const fallbackName = getModelDisplayName(currentModel);
+        setStoredArtModel(currentModel);
+        if (options?.onFallback) {
+          options.onFallback(currentModel, `Quota limit reached on ${prevModelName}. Auto-switched to ${fallbackName}.`);
+        }
+        console.warn(`[Quota Fallback] Switched art model from ${prevModelName} to ${fallbackName}`);
+        continue;
+      }
+
       console.warn(`Attempt ${attempt}/${maxRetries} failed:`, lastError.message);
       
       if (attempt === maxRetries) {
         console.error('All retry attempts failed for ASCII art generation');
         throw new Error(`Could not generate ASCII art after ${maxRetries} attempts: ${lastError.message}`);
       }
-      // Continue to next attempt
     }
   }
 
-  // This should never be reached, but just in case
   throw lastError || new Error('All retry attempts failed');
 }
+

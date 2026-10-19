@@ -4,12 +4,21 @@
 */
 
 import React, { useState, useEffect, useCallback } from 'react';
-import { streamDefinition, generateAsciiArt, AsciiArtData, getStoredApiKey, setStoredApiKey } from './services/geminiService';
+import {
+  streamDefinition,
+  generateAsciiArt,
+  AsciiArtData,
+  getStoredApiKey,
+  getStoredTextModel,
+  getStoredArtModel,
+  getModelDisplayName,
+} from './services/geminiService';
 import ContentDisplay from './components/ContentDisplay';
 import SearchBar from './components/SearchBar';
 import LoadingSkeleton from './components/LoadingSkeleton';
 import AsciiArtDisplay from './components/AsciiArtDisplay';
 import { ApiKeyModal } from './components/ApiKeyModal';
+import { SettingsModal } from './components/SettingsModal';
 
 // A curated list of "banger" words and phrases for the random button.
 const PREDEFINED_WORDS = [
@@ -27,7 +36,6 @@ const PREDEFINED_WORDS = [
   'Existential', 'Nihilism', 'Solipsism', 'Phenomenology', 'Hermeneutics', 'Deconstruction', 'Postmodern', 'Absurdism', 'Catharsis', 'Epiphany', 'Melancholy', 'Nostalgia', 'Longing', 'Reverie', 'Pathos', 'Ethos', 'Logos', 'Mythos', 'Anamnesis', 'Intertextuality', 'Metafiction', 'Stream', 'Lacuna', 'Caesura', 'Enjambment'
 ];
 const UNIQUE_WORDS = [...new Set(PREDEFINED_WORDS)];
-
 
 /**
  * Creates a simple ASCII art bounding box as a fallback.
@@ -54,15 +62,33 @@ const App: React.FC = () => {
   const [generationTime, setGenerationTime] = useState<number | null>(null);
   const [hasApiKey, setHasApiKey] = useState<boolean>(() => !!getStoredApiKey());
   const [showKeyModal, setShowKeyModal] = useState<boolean>(() => !getStoredApiKey());
+  const [showSettingsModal, setShowSettingsModal] = useState<boolean>(false);
+  const [textModel, setTextModel] = useState<string>(() => getStoredTextModel());
+  const [artModel, setArtModel] = useState<string>(() => getStoredArtModel());
+  const [quotaToast, setQuotaToast] = useState<string | null>(null);
   const [reloadTrigger, setReloadTrigger] = useState<number>(0);
 
-  const handleSaveApiKey = (newKey: string) => {
-    setStoredApiKey(newKey);
+  const handleSaveApiKey = () => {
     setHasApiKey(true);
     setShowKeyModal(false);
-    // Trigger re-fetch for current topic with the new key
     setReloadTrigger(prev => prev + 1);
   };
+
+  const handleSettingsChanged = () => {
+    setTextModel(getStoredTextModel());
+    setArtModel(getStoredArtModel());
+    setHasApiKey(!!getStoredApiKey());
+    setReloadTrigger(prev => prev + 1);
+  };
+
+  const handleQuotaFallbackNotification = useCallback((fallbackModel: string, reason: string) => {
+    setTextModel(getStoredTextModel());
+    setArtModel(getStoredArtModel());
+    setQuotaToast(reason);
+    setTimeout(() => {
+      setQuotaToast(null);
+    }, 6000);
+  }, []);
 
   // F11 Fullscreen toggle
   useEffect(() => {
@@ -80,14 +106,12 @@ const App: React.FC = () => {
     return () => window.removeEventListener('keydown', handleKeyPress);
   }, []);
 
-
   useEffect(() => {
     if (!currentTopic) return;
 
     let isCancelled = false;
 
     const fetchContentAndArt = async () => {
-      // Set initial state for a clean page load
       setIsLoading(true);
       setError(null);
       setContent(''); // Clear previous content immediately
@@ -95,9 +119,14 @@ const App: React.FC = () => {
       setGenerationTime(null);
       const startTime = performance.now();
 
-      // Kick off ASCII art generation, but don't wait for it.
-      // It will appear when it's ready, without blocking the definition.
-      generateAsciiArt(currentTopic)
+      // Kick off ASCII art generation
+      generateAsciiArt(currentTopic, {
+        onFallback: (newModel, reason) => {
+          if (!isCancelled) {
+            handleQuotaFallbackNotification(newModel, reason);
+          }
+        },
+      })
         .then(art => {
           if (!isCancelled) {
             setAsciiArt(art);
@@ -114,7 +143,13 @@ const App: React.FC = () => {
 
       let accumulatedContent = '';
       try {
-        for await (const chunk of streamDefinition(currentTopic)) {
+        for await (const chunk of streamDefinition(currentTopic, {
+          onFallback: (newModel, reason) => {
+            if (!isCancelled) {
+              handleQuotaFallbackNotification(newModel, reason);
+            }
+          },
+        })) {
           if (isCancelled) break;
           
           if (chunk.startsWith('Error:')) {
@@ -129,7 +164,7 @@ const App: React.FC = () => {
         if (!isCancelled) {
           const errorMessage = e instanceof Error ? e.message : 'An unknown error occurred';
           setError(errorMessage);
-          setContent(''); // Ensure content is clear on error
+          setContent('');
           console.error(e);
         }
       } finally {
@@ -146,8 +181,7 @@ const App: React.FC = () => {
     return () => {
       isCancelled = true;
     };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [currentTopic, reloadTrigger]);
+  }, [currentTopic, reloadTrigger, handleQuotaFallbackNotification]);
 
   const handleWordClick = useCallback((word: string) => {
     const newTopic = word.trim();
@@ -181,14 +215,56 @@ const App: React.FC = () => {
     }
   }, [currentTopic]);
 
-
   return (
     <div>
       <ApiKeyModal
         isOpen={showKeyModal}
-        onSave={handleSaveApiKey}
+        onSave={() => handleSaveApiKey()}
         onClose={hasApiKey ? () => setShowKeyModal(false) : undefined}
       />
+
+      <SettingsModal
+        isOpen={showSettingsModal}
+        onClose={() => setShowSettingsModal(false)}
+        onSettingsChanged={handleSettingsChanged}
+      />
+
+      {/* Quota fallback alert toast */}
+      {quotaToast && (
+        <div
+          style={{
+            position: 'fixed',
+            top: '1rem',
+            right: '1rem',
+            background: '#221500',
+            border: '1px solid #d97706',
+            color: '#fef3c7',
+            padding: '0.75rem 1rem',
+            fontSize: '0.85rem',
+            maxWidth: '360px',
+            zIndex: 9999,
+            boxShadow: '0 4px 12px rgba(0,0,0,0.4)',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            gap: '0.75rem',
+          }}
+        >
+          <span>⚠️ {quotaToast}</span>
+          <button
+            onClick={() => setQuotaToast(null)}
+            style={{
+              background: 'transparent',
+              border: 'none',
+              color: '#d97706',
+              cursor: 'pointer',
+              fontWeight: 'bold',
+            }}
+          >
+            ✕
+          </button>
+        </div>
+      )}
 
       <SearchBar onSearch={handleSearch} onRandom={handleRandom} isLoading={isLoading} />
       
@@ -206,9 +282,24 @@ const App: React.FC = () => {
           </h2>
 
           {error && (
-            <div style={{ border: '1px solid #cc0000', padding: '1rem', color: '#cc0000' }}>
-              <p style={{ margin: 0 }}>An Error Occurred</p>
+            <div style={{ border: '1px solid #cc0000', padding: '1rem', color: '#cc0000', marginBottom: '1rem' }}>
+              <p style={{ margin: 0, fontWeight: 'bold' }}>An Error Occurred</p>
               <p style={{ marginTop: '0.5rem', margin: 0 }}>{error}</p>
+              {error.toLowerCase().includes('429') || error.toLowerCase().includes('quota') ? (
+                <div style={{ marginTop: '0.75rem' }}>
+                  <button
+                    onClick={() => setShowSettingsModal(true)}
+                    style={{
+                      textDecoration: 'underline',
+                      color: '#cc0000',
+                      cursor: 'pointer',
+                      fontSize: '0.9rem',
+                    }}
+                  >
+                    Open Settings to switch to a higher-quota or lighter model →
+                  </button>
+                </div>
+              ) : null}
             </div>
           )}
           
@@ -237,11 +328,15 @@ const App: React.FC = () => {
 
       <footer className="sticky-footer">
         <p className="footer-text" style={{ margin: 0 }}>
-          Infinite Wiki by <a href="https://x.com/dev_valladares" target="_blank" rel="noopener noreferrer">Dev Valladares</a> · Generated by Gemini 2.5 Flash Lite
+          Infinite Wiki by <a href="https://x.com/dev_valladares" target="_blank" rel="noopener noreferrer">Dev Valladares</a>
+          {' · '}
+          <span title={`Text: ${getModelDisplayName(textModel)} | Art: ${getModelDisplayName(artModel)}`}>
+            {getModelDisplayName(textModel)}
+          </span>
           {generationTime && ` · ${Math.round(generationTime)}ms`}
           {' · '}
           <button
-            onClick={() => setShowKeyModal(true)}
+            onClick={() => setShowSettingsModal(true)}
             style={{
               background: 'transparent',
               border: 'none',
@@ -251,8 +346,9 @@ const App: React.FC = () => {
               padding: 0,
               font: 'inherit',
             }}
+            title="Configure text/art models and API key"
           >
-            API Key
+            ⚙ Settings
           </button>
         </p>
       </footer>
@@ -261,3 +357,4 @@ const App: React.FC = () => {
 };
 
 export default App;
+
