@@ -5,15 +5,24 @@
 
 import {GoogleGenAI} from '@google/genai';
 
-// This check is for development-time feedback.
-if (!process.env.API_KEY) {
-  console.error(
-    'API_KEY environment variable is not set. The application will not be able to connect to the Gemini API.',
-  );
+const STORAGE_KEY = 'gemini_api_key';
+
+export function getStoredApiKey(): string {
+  return localStorage.getItem(STORAGE_KEY) || (typeof process !== 'undefined' && process.env?.API_KEY) || '';
 }
 
-// The "!" asserts API_KEY is non-null after the check.
-const ai = new GoogleGenAI({apiKey: process.env.API_KEY!});
+export function setStoredApiKey(key: string): void {
+  localStorage.setItem(STORAGE_KEY, key.trim());
+}
+
+function getGenAIClient(): GoogleGenAI {
+  const apiKey = getStoredApiKey();
+  if (!apiKey) {
+    throw new Error('API key is not configured. Please enter your Gemini API key.');
+  }
+  return new GoogleGenAI({ apiKey });
+}
+
 const artModelName = 'gemini-2.5-flash';
 const textModelName = 'gemini-2.5-flash-lite';
 /**
@@ -43,14 +52,16 @@ export interface AsciiArtData {
 export async function* streamDefinition(
   topic: string,
 ): AsyncGenerator<string, void, undefined> {
-  if (!process.env.API_KEY) {
-    yield 'Error: API_KEY is not configured. Please check your environment variables to continue.';
+  const apiKey = getStoredApiKey();
+  if (!apiKey) {
+    yield 'Error: API key is not configured. Please set your Gemini API key to continue.';
     return;
   }
 
   const prompt = `Provide a concise, single-paragraph encyclopedia-style definition for the term: "${topic}". Be informative and neutral. Do not use markdown, titles, or any special formatting. Respond with only the text of the definition itself.`;
 
   try {
+    const ai = getGenAIClient();
     const response = await ai.models.generateContentStream({
       model: textModelName,
       contents: prompt,
@@ -80,9 +91,7 @@ export async function* streamDefinition(
  * @returns A promise that resolves to a single random word.
  */
 export async function getRandomWord(): Promise<string> {
-  if (!process.env.API_KEY) {
-    throw new Error('API_KEY is not configured.');
-  }
+  const ai = getGenAIClient();
 
   const prompt = `Generate a single, random, interesting English word or a two-word concept. It can be a noun, verb, adjective, or a proper noun. Respond with only the word or concept itself, with no extra text, punctuation, or formatting.`;
 
@@ -110,9 +119,7 @@ export async function getRandomWord(): Promise<string> {
  * @returns A promise that resolves to an object with art and optional text.
  */
 export async function generateAsciiArt(topic: string): Promise<AsciiArtData> {
-  if (!process.env.API_KEY) {
-    throw new Error('API_KEY is not configured.');
-  }
+  const ai = getGenAIClient();
   
   const artPromptPart = `1. "art": meta ASCII visualization of the word "${topic}":
   - Palette: │─┌┐└┘├┤┬┴┼►◄▲▼○●◐◑░▒▓█▀▄■□▪▫★☆♦♠♣♥⟨⟩/\\_|
