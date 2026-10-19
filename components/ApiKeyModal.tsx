@@ -56,18 +56,33 @@ export const ApiKeyModal: React.FC<ApiKeyModalProps> = ({ isOpen, onSave, onClos
               background: '#222',
               border: '1px solid #555',
               color: '#fff',
-              marginBottom: '1rem',
+              marginBottom: '0.75rem',
               boxSizing: 'border-box',
             }}
             autoFocus
           />
+
+          <div style={{ marginBottom: '1.25rem', fontSize: '0.85rem' }}>
+            <span style={{ color: '#888' }}>Don't have a key? </span>
+            <a
+              href="https://aistudio.google.com/app/apikey"
+              target="_blank"
+              rel="noopener noreferrer"
+              style={{
+                color: '#fff',
+                textDecoration: 'underline',
+              }}
+            >
+              Get an API key on Google AI Studio ↗
+            </a>
+          </div>
 
           <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '0.5rem' }}>
             {onClose && (
               <button
                 type="button"
                 onClick={onClose}
-                style={{ padding: '0.5rem 1rem', background: 'transparent', color: '#aaa', border: '1px solid #444' }}
+                style={{ padding: '0.5rem 1rem', background: 'transparent', color: '#aaa', border: '1px solid #444', cursor: 'pointer' }}
               >
                 Cancel
               </button>
