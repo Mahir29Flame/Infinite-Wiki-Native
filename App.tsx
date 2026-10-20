@@ -19,6 +19,7 @@ import LoadingSkeleton from './components/LoadingSkeleton';
 import AsciiArtDisplay from './components/AsciiArtDisplay';
 import { ApiKeyModal } from './components/ApiKeyModal';
 import { SettingsModal } from './components/SettingsModal';
+import { useWindowShortcuts } from './components/WindowShortcuts';
 
 // A curated list of "banger" words and phrases for the random button.
 const PREDEFINED_WORDS = [
@@ -90,21 +91,8 @@ const App: React.FC = () => {
     }, 6000);
   }, []);
 
-  // F11 Fullscreen toggle
-  useEffect(() => {
-    const handleKeyPress = (e: KeyboardEvent) => {
-      if (e.key === 'F11') {
-        e.preventDefault();
-        if (!document.fullscreenElement) {
-          document.documentElement.requestFullscreen();
-        } else {
-          document.exitFullscreen();
-        }
-      }
-    };
-    window.addEventListener('keydown', handleKeyPress);
-    return () => window.removeEventListener('keydown', handleKeyPress);
-  }, []);
+  // F11 Fullscreen and Ctrl +/- Text/DPI Resizing shortcuts
+  useWindowShortcuts();
 
   useEffect(() => {
     if (!currentTopic) return;

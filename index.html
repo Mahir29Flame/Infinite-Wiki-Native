@@ -14,11 +14,15 @@
         50% { opacity: 0; }
       }
 
+      :root {
+        --app-font-scale: 1;
+      }
+
       body {
         background-color: #ffffff;
         color: #000000;
         font-family: 'Kosugi', sans-serif;
-        font-size: 1.1rem; /* Set base font size for the entire app */
+        font-size: calc(1.1rem * var(--app-font-scale, 1)); /* Scalable base text size */
         line-height: 1.6; /* Set base line height for readability */
         margin: 0;
         padding: 2rem 2rem 5rem 2rem; /* Increased bottom padding for sticky footer */
