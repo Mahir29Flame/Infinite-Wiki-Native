@@ -8,11 +8,7 @@ Infinite Wiki PC is a desktop port of **Infinite Wiki** for Windows with many ad
 The original **Infinite Wiki** was a **Google AI Studio demo** created by **Dev Valladares** ([@dev_valladares](https://x.com/dev_valladares)).  
 This repository adapts that concept into a desktop app workflow with a React + TypeScript frontend and a Tauri (Rust) shell.
 
-<<<<<<< HEAD
 ## What's New (v2.2.0):
-=======
-## What's New (v2.1.0):
->>>>>>> 779279e54ce7be13cfe7f856d913bf51adf6c74a
 
 - Changed Default Text Model from gemini-2.5-flash-lite to gemini-3.5-flash-lite (25x more quota)
 - Changed Default Art Model from gemini-2.0-flash-lite to gemini-3.5-flash-lite (25x more quota)
