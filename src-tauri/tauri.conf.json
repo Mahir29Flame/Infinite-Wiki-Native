@@ -2,48 +2,38 @@
   "build": {
     "beforeDevCommand": "npm run dev",
     "beforeBuildCommand": "npm run build",
-    "devPath": "http://localhost:3000",
-    "distDir": "../dist"
+    "frontendDist": "../dist",
+    "devUrl": "http://localhost:3000"
   },
-  "package": {
-    "productName": "Infinite Wiki PC",
-    "version": "2.2.0"
+  "bundle": {
+    "active": true,
+    "targets": "all",
+    "icon": [
+      "../icons/32x32.png",
+      "../icons/128x128.png",
+      "../icons/128x128@2x.png",
+      "../icons/icon.icns",
+      "../icons/icon.ico"
+    ]
   },
-  "tauri": {
-    "allowlist": {
-      "all": false,
-      "shell": {
-        "all": false,
-        "open": true
-      },
-      "window": {
-        "all": false,
-        "setFullscreen": true
-      }
-    },
-    "bundle": {
-      "active": true,
-      "targets": "all",
-      "identifier": "com.example.infinite-wiki",
-      "icon": [
-        "../icons/32x32.png",
-        "../icons/128x128.png",
-        "../icons/128x128@2x.png",
-        "../icons/icon.icns",
-        "../icons/icon.ico"
-      ]
-    },
-    "security": {
-      "csp": null
-    },
+  "productName": "Infinite Wiki Native",
+  "mainBinaryName": "Infinite Wiki Native",
+  "version": "2.2.0",
+  "identifier": "com.example.infinite-wiki",
+  "plugins": {},
+  "app": {
     "windows": [
       {
         "fullscreen": false,
         "resizable": true,
-        "title": "Infinite Wiki PC",
+        "title": "Infinite Wiki Native",
         "width": 800,
-        "height": 600
+        "height": 600,
+        "useHttpsScheme": true
       }
-    ]
+    ],
+    "security": {
+      "csp": null
+    }
   }
 }

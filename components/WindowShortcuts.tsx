@@ -1,5 +1,6 @@
 import React, { useEffect, useState, ReactNode } from 'react';
-import { appWindow } from '@tauri-apps/api/window';
+import { getCurrentWebviewWindow } from '@tauri-apps/api/webviewWindow';
+const appWindow = getCurrentWebviewWindow()
 
 const STORAGE_KEY = 'infinite_wiki_font_scale';
 const DEFAULT_SCALE = 1.0;
