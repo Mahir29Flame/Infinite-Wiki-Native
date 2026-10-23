@@ -16,10 +16,9 @@
       "icons/icon.ico"
     ]
   },
-  
   "productName": "Infinite Wiki Native",
   "mainBinaryName": "Infinite Wiki Native",
-  "version": "2.2.0",
+  "version": "2.3.0",
   "identifier": "com.nj29flame.infinitewiki",
   "plugins": {},
   "app": {
