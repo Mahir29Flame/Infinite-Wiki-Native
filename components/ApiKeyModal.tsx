@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { openExternalUrl } from './openExternalUrl';
 
 interface ApiKeyModalProps {
   isOpen: boolean;
@@ -66,13 +67,15 @@ export const ApiKeyModal: React.FC<ApiKeyModalProps> = ({ isOpen, onSave, onClos
             <span style={{ color: '#888' }}>Don't have a key? </span>
             <a
               href="https://aistudio.google.com/app/apikey"
-              target="_blank"
-              rel="noopener noreferrer"
+              onClick={(event) => {
+                event.preventDefault();
+                void openExternalUrl('https://aistudio.google.com/app/apikey');
+              }}
               style={{
                 color: '#fff',
                 textDecoration: 'underline',
               }}
-            >
+             >
               Get an API key on Google AI Studio ↗
             </a>
           </div>
