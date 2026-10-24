@@ -10,6 +10,7 @@ This repository adapts that concept into a desktop app workflow with a React + T
 
 ## What's New (v2.3.3):
 
+- Fixed AppIcon transparency issue
 - Fixed API Key Submission issue
 - Added Android support
 - Changed Default Text Model from gemini-2.5-flash-lite to gemini-3.5-flash-lite (25x more quota)
