@@ -9,6 +9,7 @@ import {
   generateAsciiArt,
   AsciiArtData,
   getStoredApiKey,
+  setStoredApiKey,
   getStoredTextModel,
   getStoredArtModel,
   getModelDisplayName,
@@ -69,7 +70,8 @@ const App: React.FC = () => {
   const [quotaToast, setQuotaToast] = useState<string | null>(null);
   const [reloadTrigger, setReloadTrigger] = useState<number>(0);
 
-  const handleSaveApiKey = () => {
+  const handleSaveApiKey = (apiKey: string) => {
+    setStoredApiKey(apiKey);
     setHasApiKey(true);
     setShowKeyModal(false);
     setReloadTrigger(prev => prev + 1);
@@ -207,7 +209,7 @@ const App: React.FC = () => {
     <div>
       <ApiKeyModal
         isOpen={showKeyModal}
-        onSave={() => handleSaveApiKey()}
+        onSave={handleSaveApiKey}
         onClose={hasApiKey ? () => setShowKeyModal(false) : undefined}
       />
 

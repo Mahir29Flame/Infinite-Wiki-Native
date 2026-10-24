@@ -16,6 +16,7 @@ export const ApiKeyModal: React.FC<ApiKeyModalProps> = ({ isOpen, onSave, onClos
     e.preventDefault();
     if (keyInput.trim()) {
       onSave(keyInput.trim());
+    setKeyInput('');
     }
   };
 
