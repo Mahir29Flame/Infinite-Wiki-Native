@@ -23,7 +23,7 @@ abstract class BuildTask : DefaultTask() {
 
     @TaskAction
     fun assemble() {
-        val executable = """npm""";
+        val executable = """C:\Program Files\nodejs\npm.cmd""";
         try {
             runTauriCli(executable)
         } catch (e: Exception) {

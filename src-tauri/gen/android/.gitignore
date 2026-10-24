@@ -18,3 +18,9 @@ keystore.properties
 
 /.tauri
 /tauri.settings.gradle
+*.jks
+*.keystore
+*.p12
+src-tauri/gen/android/keystore.properties
+src-tauri/gen/android/app/build/
+src-tauri/gen/android/build/

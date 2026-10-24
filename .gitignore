@@ -29,3 +29,6 @@ src-tauri/target
 
 # Release files
 releases/
+
+# Keystore files
+infinite-wiki-release.jks
