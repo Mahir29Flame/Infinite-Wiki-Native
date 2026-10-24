@@ -1,0 +1,14 @@
+Infinite Wiki Native is a Native port of Infinite Wiki for Windows and Android devices with multiple added features, ported with Tauri by @Mahir29Flame.
+The original Infinite Wiki was a Google AI Studio demo created by Dev Valladares (@dev_valladares).
+This repository adapts that concept into a desktop app workflow with a React + TypeScript frontend and a Tauri (Rust) shell.
+
+It Generates a concise encyclopedia-style definition for any topic using Gemini 3.5 Flash Lite.
+Streams text output progressively in the UI.
+Makes words in generated content clickable to continue exploring related topics.
+Generates ASCII art for the current topic.
+Includes a random-topic exploration flow.
+
+Tech stack
+Frontend: React 19, TypeScript, Vite
+AI SDK: @google/genai
+Desktop runtime: Tauri 2.x (Rust backend + web frontend)
