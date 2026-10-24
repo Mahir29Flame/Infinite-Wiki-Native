@@ -8,7 +8,7 @@ Infinite Wiki Native is a Native port of **Infinite Wiki** for Windows and Andro
 The original **Infinite Wiki** was a **Google AI Studio demo** created by **Dev Valladares** ([@dev_valladares](https://x.com/dev_valladares)).  
 This repository adapts that concept into a desktop app workflow with a React + TypeScript frontend and a Tauri (Rust) shell.
 
-## What's New (v2.3.1):
+## What's New (v2.3.2):
 
 - Added Android support
 - Changed Default Text Model from gemini-2.5-flash-lite to gemini-3.5-flash-lite (25x more quota)
