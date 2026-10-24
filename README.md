@@ -10,6 +10,7 @@ This repository adapts that concept into a desktop app workflow with a React + T
 
 ## What's New (v2.3.0):
 
+- Added Android support
 - Changed Default Text Model from gemini-2.5-flash-lite to gemini-3.5-flash-lite (25x more quota)
 - Changed Default Art Model from gemini-2.0-flash-lite to gemini-3.5-flash-lite (25x more quota)
 - Added Setting modal for changing models and api key data
