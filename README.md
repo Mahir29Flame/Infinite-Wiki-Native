@@ -1,9 +1,9 @@
-# Infinite Wiki PC
+# Infinite Wiki Native
 
 <img width="792" height="744" alt="Screenshot 2026-10-19 175145" src="https://github.com/user-attachments/assets/47ac896d-01d7-4a83-8be9-be6ece13799c" /> \
 [![Download Infinite Wiki PC](https://a.fsdn.com/con/app/sf-download-button)](https://sourceforge.net/projects/infinite-wiki/files/latest/download)
 
-Infinite Wiki PC is a desktop port of **Infinite Wiki** for Windows with many added features, ported with **Tauri** by **[@Mahir29Flame](https://github.com/Mahir29Flame)**.
+Infinite Wiki Native is a Native port of **Infinite Wiki** for Windows and Android devices with multiple added features, ported with **Tauri** by **[@Mahir29Flame](https://github.com/Mahir29Flame)**.
 
 The original **Infinite Wiki** was a **Google AI Studio demo** created by **Dev Valladares** ([@dev_valladares](https://x.com/dev_valladares)).  
 This repository adapts that concept into a desktop app workflow with a React + TypeScript frontend and a Tauri (Rust) shell.
