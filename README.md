@@ -10,6 +10,7 @@ This repository adapts that concept into a desktop app workflow with a React + T
 
 ## What's New (v2.3.2):
 
+- Fixed API Key Submission issue
 - Added Android support
 - Changed Default Text Model from gemini-2.5-flash-lite to gemini-3.5-flash-lite (25x more quota)
 - Changed Default Art Model from gemini-2.0-flash-lite to gemini-3.5-flash-lite (25x more quota)
@@ -33,7 +34,7 @@ This repository adapts that concept into a desktop app workflow with a React + T
 
 - **Frontend:** React 19, TypeScript, Vite
 - **AI SDK:** `@google/genai`
-- **Desktop runtime:** Tauri 1.x (Rust backend + web frontend)
+- **Desktop runtime:** Tauri 2.x (Rust backend + web frontend)
 
 
 ## Setup
