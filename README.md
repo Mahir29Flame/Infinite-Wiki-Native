@@ -1,6 +1,6 @@
 # Infinite Wiki Native
 
-<img width="792" height="744" alt="Screenshot 2026-10-19 175145" src="https://github.com/user-attachments/assets/47ac896d-01d7-4a83-8be9-be6ece13799c" /> \
+<img width="885" height="734" alt="image" src="https://github.com/user-attachments/assets/549c684c-686f-4091-98c0-23c7b825a0ba" />\
 [![Download Infinite Wiki PC](https://a.fsdn.com/con/app/sf-download-button)](https://sourceforge.net/projects/infinite-wiki/files/latest/download)
 
 Infinite Wiki Native is a Native port of **Infinite Wiki** for Windows and Android devices with multiple added features, ported with **Tauri** by **[@Mahir29Flame](https://github.com/Mahir29Flame)**.
