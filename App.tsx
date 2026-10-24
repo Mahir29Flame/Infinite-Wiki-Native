@@ -316,7 +316,9 @@ const App: React.FC = () => {
 
       <footer className="sticky-footer">
         <p className="footer-text" style={{ margin: 0 }}>
-          Infinite Wiki by <a href="https://x.com/dev_valladares" target="_blank" rel="noopener noreferrer">Dev Valladares</a>
+          Native Port of Infinite Wiki by <a href="https://github.com/Mahir29Flame" target="_blank" rel="noopener noreferrer">Mahir29Flame</a>
+          {' · '}
+          Original by <a href="https://x.com/dev_valladares" target="_blank" rel="noopener noreferrer">Dev Valladares</a>
           {' · '}
           <span title={`Text: ${getModelDisplayName(textModel)} | Art: ${getModelDisplayName(artModel)}`}>
             {getModelDisplayName(textModel)}
@@ -330,9 +332,10 @@ const App: React.FC = () => {
               border: 'none',
               color: '#888',
               cursor: 'pointer',
-              textDecoration: 'underline',
+              textDecoration: 'none',
               padding: 0,
               font: 'inherit',
+              fontSize: '1.2rem',
             }}
             title="Configure text/art models and API key"
           >
