@@ -22,7 +22,7 @@
   },
   "productName": "Infinite Wiki Native",
   "mainBinaryName": "Infinite Wiki",
-  "version": "2.3.2",
+  "version": "2.3.3",
   "identifier": "com.nj29flame.infinitewiki",
   "plugins": {},
   "app": {
